@@ -37,6 +37,7 @@ install(
     deps = [
         "@eigen//:install",
         "@lcm//:install",
+        "@fmt//:install",
         "//drake:install",
         "//tools:install",
     ],
