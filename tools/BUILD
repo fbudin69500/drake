@@ -92,6 +92,11 @@ exports_files(
     visibility = ["@fmt//:__pkg__"],
 )
 
+exports_files(
+    ["fcl-create-cps.py"],
+    visibility = ["@fcl//:__pkg__"],
+)
+
 alias(
     name = "buildifier",
     actual = "@com_github_bazelbuild_buildtools//buildifier",

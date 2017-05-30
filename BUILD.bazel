@@ -38,6 +38,7 @@ install(
         "@eigen//:install",
         "@lcm//:install",
         "@fmt//:install",
+        "@fcl//:install",
         "//drake:install",
         "//tools:install",
     ],
