@@ -97,6 +97,11 @@ exports_files(
     visibility = ["@fcl//:__pkg__"],
 )
 
+exports_files(
+    ["bullet-create-cps.py"],
+    visibility = ["@bullet//:__pkg__"],
+)
+
 alias(
     name = "buildifier",
     actual = "@com_github_bazelbuild_buildtools//buildifier",

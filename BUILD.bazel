@@ -39,6 +39,7 @@ install(
         "@lcm//:install",
         "@fmt//:install",
         "@fcl//:install",
+        "@bullet//:install",
         "//drake:install",
         "//tools:install",
     ],
