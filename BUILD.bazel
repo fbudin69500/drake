@@ -40,6 +40,7 @@ install(
         "@fmt//:install",
         "@fcl//:install",
         "@bullet//:install",
+        "@tinyobjloader//:install",
         "//drake:install",
         "//tools:install",
     ],

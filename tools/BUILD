@@ -102,6 +102,11 @@ exports_files(
     visibility = ["@bullet//:__pkg__"],
 )
 
+exports_files(
+    ["tinyobjloader-create-cps.py"],
+    visibility = ["@tinyobjloader//:__pkg__"],
+)
+
 alias(
     name = "buildifier",
     actual = "@com_github_bazelbuild_buildtools//buildifier",
