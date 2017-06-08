@@ -215,3 +215,28 @@ drake_generate_file = rule(
     },
     implementation = _generate_file_impl,
 )
+
+def generate_include_header(
+        name,
+        srcs,
+        outs,
+        visibility=["//visibility:private"]):
+    """Generate a file including a list of header files.
+
+    The generated file will be of the form:
+    #include <srcs1>
+    #include <srcs2>
+
+    By default, visibility is set to ["//visibility:private"]
+    """
+    native.genrule(
+        name = name,
+        srcs = srcs,
+        outs = outs,
+        cmd = "(" + (
+            "echo '#pragma once' && " +
+            "echo '$(SRCS)' | tr ' ' '\\n' | " +
+            "sed 's|.*include/\(.*\)|#include \\<\\1\\>|g'"
+        ) + ") > '$@'",
+        visibility = visibility,
+    )

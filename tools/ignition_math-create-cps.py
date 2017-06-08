@@ -2,7 +2,8 @@
 
 from cpsutils import read_version_defs
 
-defs = read_version_defs("#define IGNITION_MATH_VERSION_FULL[\s]\"([0-9]+).([0-9]+).([0-9]+)\"")
+def_re = "#define IGNITION_MATH_VERSION_FULL[\s]\"([0-9]+).([0-9]+).([0-9]+)\""
+defs = read_version_defs(def_re)
 
 content = """
 {

@@ -2,6 +2,7 @@
 
 load("@drake//tools:cmake_configure_file.bzl", "cmake_configure_file")
 load("@drake//tools:install.bzl", "cmake_config", "install", "install_cmake_config")
+load("@drake//tools:drake.bzl", "generate_include_header")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -64,18 +65,11 @@ public_headers = [
 # public headers in the library.  The first line is
 # '#include <ignition/math/config.hh>' followed by one line like
 # '#include <ignition/math/Angle.hh>' for each non-generated header.
-genrule(
+generate_include_header(
     name = "mathhh_genrule",
-    srcs = public_headers,
+    srcs = [":config"] + public_headers,
     outs = ["include/ignition/math.hh"],
-    # TODO: centralize this logic, as it is used here, in sdformat.BUILD, and
-    # in fcl.BUILD
-    cmd = "(" + (
-        "echo '#include <ignition/math/config.hh>' && " +
-        "echo '$(SRCS)' | tr ' ' '\\n' | " +
-        "sed 's|.*include/\(.*\)|#include \\<\\1\\>|g'"
-    ) + ") > '$@'",
-    visibility = ["//visibility:private"],
+    visibility = ["//visibility:public"],
 )
 
 # Generates the library exported to users.  The explicitly listed srcs= matches
