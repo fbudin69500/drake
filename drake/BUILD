@@ -3,7 +3,7 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load("//tools:install.bzl", "install")
+load("//tools:install.bzl", "install", "install_cmake_config", "cmake_config")
 load("//tools:transitive_hdrs.bzl", "transitive_hdrs_library")
 
 # Should include everything any consumer of Drake would ever need.
@@ -357,3 +357,17 @@ cc_library(
         ":vtk_deps",
     ],
 )
+
+cmake_config(
+    package = "drake",
+    script = "@drake//tools:drake-create-cps.py",
+    version_file = "@drake//drake/lcmtypes:drake_java_target_list",
+)
+
+install_cmake_config(
+    name = "cmake-install",
+    package = "drake",
+    versioned = 0,
+    visibility = ["//visibility:public"],
+)
+

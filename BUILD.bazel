@@ -66,9 +66,10 @@ install(
     docs = ["LICENSE.TXT"],
     deps = [
         "//drake:install",
+        "//drake:cmake-install",
         "//drake/common:install",
         "//drake/lcmtypes:install",
-        "//tools:install",
+        #"//tools:install",
     ] + DRAKE_EXTERNAL_PACKAGE_INSTALLS,
 )
 

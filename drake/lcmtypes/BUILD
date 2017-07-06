@@ -329,6 +329,15 @@ java_binary(
     ],
 )
 
+DRAKE_JAVA_LCMTYPES_LIST = "\n".join(["%s" % j[1:] for j in DRAKE_JAVA_LCMTYPES])
+
+genrule(
+    name = "create_drake_java_target_list",
+    outs = ["drake_java_target_list"],
+    cmd = "echo \"" + DRAKE_JAVA_LCMTYPES_LIST + "\"> \"$@\"",
+    visibility = ["//visibility:public"],
+)
+
 install(
     name = "install",
     guess_hdrs = "PACKAGE",

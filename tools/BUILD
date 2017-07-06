@@ -140,6 +140,11 @@ exports_files(
 )
 
 exports_files(
+    ["drake-create-cps.py"],
+    visibility = ["//visibility:public"],#@drake//:__subpackages__"],
+)
+
+exports_files(
     ["libbot.cps"],
     visibility = ["@libbot//:__pkg__"],
 )
@@ -154,17 +159,12 @@ alias(
     actual = "@com_github_bazelbuild_buildtools//buildifier",
 )
 
-cmake_config(
-    cps_file_name = "drake.cps",
-    package = "drake",
-)
-
-install_cmake_config(
-    name = "install",
-    package = "drake",
-    versioned = 0,
-    visibility = ["//visibility:public"],
-)
+#install_cmake_config(
+#    name = "install",
+#    package = "drake",
+#    versioned = 0,
+#    visibility = ["//visibility:public"],
+#)
 
 # === CROSSTOOL rules ===
 
