@@ -20,6 +20,6 @@ drake_cc_binary(
     ],
 )
 
-install_data("share/drake/drake/examples/zmp")
+install_data()
 
 cpplint()

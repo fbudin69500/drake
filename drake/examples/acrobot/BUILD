@@ -10,17 +10,6 @@ load(
 )
 load("//tools:install_data.bzl", "install_data")
 
-filegroup(
-    name = "models",
-    srcs = glob([
-        "**/*.obj",
-        "**/*.sdf",
-        "**/*.urdf",
-        "**/*.xml",
-    ]),
-    visibility = ["//visibility:public"],
-)
-
 drake_cc_library(
     name = "acrobot_state_vector",
     srcs = ["gen/acrobot_state_vector.cc"],
@@ -231,6 +220,6 @@ drake_cc_googletest(
     ],
 )
 
-install_data("share/drake/drake/examples/acrobot")
+install_data()
 
 cpplint()

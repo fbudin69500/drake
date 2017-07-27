@@ -9,13 +9,6 @@ load(
 )
 load("//tools:install_data.bzl", "install_data")
 
-filegroup(
-    name = "models",
-    srcs = glob([
-        "models/*.sdf",
-    ]),
-)
-
 drake_cc_library(
     name = "sdf_helpers",
     srcs = [
@@ -97,6 +90,6 @@ drake_cc_googletest(
     ],
 )
 
-install_data("share/drake/drake/examples/double_pendulum")
+install_data()
 
 cpplint()

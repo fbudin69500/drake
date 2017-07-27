@@ -12,17 +12,6 @@ load("//tools:install_data.bzl", "install_data")
 
 package(default_visibility = ["//visibility:public"])
 
-filegroup(
-    name = "models",
-    srcs = glob([
-        "**/*.dae",
-        "**/*.obj",
-        "**/*.sdf",
-        "**/*.urdf",
-        "**/*.xml",
-    ]),
-)
-
 drake_cc_library(
     name = "valkyrie_constants",
     srcs = ["valkyrie_constants.cc"],
@@ -192,6 +181,6 @@ drake_cc_googletest(
     ],
 )
 
-install_data("share/drake/drake/examples/valkyrie")
+install_data()
 
 cpplint()

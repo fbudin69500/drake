@@ -3,4 +3,4 @@
 
 load("//tools:install_data.bzl", "install_data")
 
-install_data("share/drake/drake/examples/irb140")
+install_data()

@@ -90,6 +90,6 @@ filegroup(
     ],
 )
 
-install_data("share/drake/drake/examples/contact_model")
+install_data()
 
 cpplint()

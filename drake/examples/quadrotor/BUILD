@@ -10,17 +10,6 @@ load(
 )
 load("//tools:install_data.bzl", "install_data")
 
-filegroup(
-    name = "models",
-    srcs = glob([
-        "**/*.obj",
-        "**/*.sdf",
-        "**/*.urdf",
-        "**/*.xml",
-    ]),
-    visibility = ["//visibility:public"],
-)
-
 drake_cc_library(
     name = "quadrotor_plant",
     srcs = ["quadrotor_plant.cc"],
@@ -99,6 +88,6 @@ drake_cc_googletest(
     ],
 )
 
-install_data("share/drake/drake/examples/quadrotor")
+install_data()
 
 cpplint()

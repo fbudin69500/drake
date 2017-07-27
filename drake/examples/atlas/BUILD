@@ -16,16 +16,6 @@ drake_cc_library(
     ],
 )
 
-filegroup(
-    name = "models",
-    srcs = glob([
-        "**/*.obj",
-        "**/*.sdf",
-        "**/*.urdf",
-        "**/*.xml",
-    ]),
-)
-
-install_data("share/drake/drake/examples/atlas")
+install_data()
 
 cpplint()

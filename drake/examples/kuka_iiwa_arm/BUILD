@@ -14,17 +14,6 @@ package(
     default_visibility = [":__subpackages__"],
 )
 
-filegroup(
-    name = "models",
-    srcs = glob([
-        "**/*.obj",
-        "**/*.sdf",
-        "**/*.urdf",
-        "**/*.xml",
-    ]),
-    visibility = ["//visibility:public"],
-)
-
 drake_cc_library(
     name = "iiwa_common",
     srcs = [
@@ -245,6 +234,6 @@ drake_cc_googletest(
     ],
 )
 
-install_data("share/drake/drake/examples/kuka_iiwa_arm")
+install_data()
 
 cpplint()

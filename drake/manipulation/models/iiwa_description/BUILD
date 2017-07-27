@@ -6,21 +6,10 @@ load(
     "//tools:drake.bzl",
     "drake_cc_googletest",
 )
-load("//tools:install.bzl", "install")
+load("//tools:install_data.bzl", "install_data")
 
 package(
     default_visibility = [":__subpackages__"],
-)
-
-filegroup(
-    name = "models",
-    srcs = glob([
-        "**/*.obj",
-        "**/*.sdf",
-        "**/*.urdf",
-        "**/*.xml",
-    ]),
-    visibility = ["//visibility:public"],
 )
 
 # === test/ ===
@@ -36,11 +25,6 @@ drake_cc_googletest(
     ],
 )
 
-install(
-    name = "install_data",
-    data = [":models"],
-    data_dest = "share/drake/drake/manipulation/models/iiwa_description",
-    visibility = ["//visibility:public"],
-)
+install_data()
 
 cpplint()

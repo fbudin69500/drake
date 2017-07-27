@@ -12,17 +12,6 @@ package(
     default_visibility = [":__subpackages__"],
 )
 
-filegroup(
-    name = "models",
-    srcs = glob([
-        "**/*.obj",
-        "**/*.sdf",
-        "**/*.urdf",
-        "**/*.xml",
-    ]),
-    visibility = ["//visibility:public"],
-)
-
 # === test/ ===
 
 drake_cc_googletest(
@@ -35,6 +24,6 @@ drake_cc_googletest(
     ],
 )
 
-install_data("share/drake/drake/manipulation/models/jaco_description")
+install_data()
 
 cpplint()

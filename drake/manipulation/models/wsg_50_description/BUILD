@@ -12,20 +12,6 @@ package(
     default_visibility = [":__subpackages__"],
 )
 
-filegroup(
-    name = "models",
-    srcs = [
-        "meshes/GUIDE_WSG50_110.obj",
-        "meshes/WSG-FMF.obj",
-        "meshes/WSG50_110.obj",
-        "package.xml",
-        "sdf/schunk_wsg_50.sdf",
-        "sdf/schunk_wsg_50_ball_contact.sdf",
-        "urdf/wsg_50_mesh_collision.urdf",
-    ],
-    visibility = ["//visibility:public"],
-)
-
 # === test/ ===
 
 drake_cc_googletest(
@@ -39,6 +25,6 @@ drake_cc_googletest(
     ],
 )
 
-install_data("share/drake/drake/manipulation/models/wsg_50_description")
+install_data()
 
 cpplint()

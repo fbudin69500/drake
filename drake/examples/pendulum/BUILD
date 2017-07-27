@@ -163,17 +163,6 @@ drake_cc_googletest(
     ],
 )
 
-filegroup(
-    name = "models",
-    srcs = glob([
-        "**/*.obj",
-        "**/*.sdf",
-        "**/*.urdf",
-        "**/*.xml",
-    ]),
-    visibility = ["//visibility:public"],
-)
-
-install_data("share/drake/drake/examples/pendulum")
+install_data()
 
 cpplint()
