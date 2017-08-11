@@ -43,6 +43,7 @@ def install(src, dst):
         subdirs.add(subdir)
 
     installed = False
+    multiple = False
     dst_full = os.path.join(prefix, dst)
     # Install file, if not up to date.
     if needs_install(src, dst):
@@ -55,7 +56,10 @@ def install(src, dst):
         print("[Up to date] %s" % dst)
 
     if dst.endswith('.so') or dst.endswith('.dylib'):
-        libs[os.path.basename(dst)] = (dst_full, installed)
+        basename = os.path.basename(dst)
+        if basename in libs:
+            multiple = True
+        libs[basename] = (dst_full, installed, multiple)
 
 
 def fix_library_rpaths():
@@ -77,16 +81,27 @@ def fix_library_rpaths():
             # keep only file path, remove version information
             relative_path = line.split(' (')[0].strip()
             # If path is relative, it needs to be replaced by absolute path
-            if "@loader_path" in relative_path:
-                dep_basename = os.path.basename(relative_path)
-                # Look for the absolute path in the dictionary of libraries
-                if dep_basename in libs.keys():
-                    check_call(
-                        ['install_name_tool',
-                         "-change", relative_path,
-                         libs[dep_basename][0],
-                         dst_full]
-                    )
+            if "@loader_path" not in relative_path:
+                continue
+            dep_basename = os.path.basename(relative_path)
+            # Look for the absolute path in the dictionary of libraries
+            if dep_basename not in libs.keys():
+                continue
+            # Check that dependency is only referenced once
+            # in the library dictionary. If it is referenced multiple times,
+            # we do not know which one to use, and fail fast.
+            if libs[dep_basename][2]:
+                sys.stderr.write(
+                    "Multiple installation rules found for %s. Cannot update "
+                    "%s relative path for this library"
+                    % (dep_basename, basename))
+                sys.exit(1)
+            check_call(
+                ['install_name_tool',
+                 "-change", relative_path,
+                 libs[dep_basename][0],
+                 dst_full]
+            )
 
 
 def main(args):
