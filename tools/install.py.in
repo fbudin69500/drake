@@ -11,7 +11,7 @@ from subprocess import check_output, check_call
 subdirs = set()
 prefix = None
 libs = {}
-
+executables = []
 
 def needs_install(src, dst):
     # Get canonical destination.
@@ -54,30 +54,78 @@ def install(src, dst):
     else:
         print("[Up to date] %s" % dst)
 
-    if dst.endswith('.so') or dst.endswith('.dylib'):
-        basename = os.path.basename(dst)
-        # Check that dependency is only referenced once
-        # in the library dictionary. If it is referenced multiple times,
-        # we do not know which one to use, and fail fast.
-        if basename in libs:
-            sys.stderr.write(
-                "Multiple installation rules found for %s." % (basename))
-            sys.exit(1)
-        libs[basename] = (dst_full, installed)
+    # On MacOS, executable and library paths may need to be updated.
+    if sys.platform == "darwin":
+        # Check if executable or library.
+        file_output = check_output(["file", dst_full])
+        if "Mach-O" in file_output:
+            # If it is an executable.
+            if "executable" in file_output:
+                executables.append(dst_full)
+            else:  # Else it is a library.
+                basename = os.path.basename(dst)
+                # Check that dependency is only referenced once
+                # in the library dictionary. If it is referenced multiple times,
+                # we do not know which one to use, and fail fast.
+                if basename in libs:
+                    sys.stderr.write(
+                        "Multiple installation rules found for %s." % (basename))
+                    sys.exit(1)
+                libs[basename] = (dst_full, installed)
+
+
+def enable_permissions(file_):
+    # Enable write permissions to allow modification.
+    os.chmod(file_, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
+             stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH
+             )
+
+def get_rpaths(file_):
+    otool_output = check_output(["otool", "-l", file_])
+    start_rpath = False
+    list_rpath = []
+    for line in otool_output.splitlines():
+        if "LC_RPATH" in line:
+            start_rpath = True
+        if start_rpath and "path" in line:
+            list_rpath.append(line.strip().split(" ")[1])
+            start_rpath = False
+    return list_rpath
+
+def delete_rpaths(file_):
+    list_rpaths = get_rpaths(file_)
+    for r in list_rpaths:
+        check_output(["install_name_tool", "-delete_rpath", r, file_])
+
+def add_rpath(rpath, file_):
+    check_output(["install_name_tool", "-add_rpath", rpath, file_])    
+
+def fix_executable_rpaths(relative_paths):
+    for e in executables:
+        enable_permissions(e)
+        delete_rpaths(e)
+        add_rpath(prefix, e)
+        for relative_path in relative_paths:
+            add_rpath(os.path.join("@loader_path", relative_path), e)
 
 
 def fix_library_rpaths():
+    relative_paths = []
     # Only fix libraries that are installed now.
     fix_libs = [(k, libs[k][0]) for k in libs.keys() if libs[k][1]]
     for basename, dst_full in fix_libs:
-        # Enable write permissions to allow modification.
-        os.chmod(dst_full, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
-                 stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH
-                 )
-        # Update library ID (remove relative path).
+        relative_path = os.path.relpath(os.path.dirname(dst_full), prefix)
+        if relative_path not in relative_paths:
+            relative_paths.append(relative_path)
+
+        enable_permissions(dst_full)
+        # Update library ID (update relative path).
+#        rel_path = dst_full.replace(prefix, "@rpath")
         check_call(
             ['install_name_tool', "-id", "@rpath/" + basename, dst_full]
             )
+        delete_rpaths(dst_full)
+        add_rpath(prefix, dst_full)
         # Check if library dependencies are specified with relative paths.
         file_output = check_output(["otool", "-L", dst_full])
         for line in file_output.splitlines():
@@ -90,13 +138,17 @@ def fix_library_rpaths():
             # Look for the absolute path in the dictionary of libraries.
             if dep_basename not in libs.keys():
                 continue
+            dep_path = libs[dep_basename][0]
+            # Dependency is in install prefix: replace absolute path with
+            # relative path to allow packaging.
+            dep_path.replace(prefix, '@rpath')
             check_call(
                 ['install_name_tool',
                  "-change", relative_path,
-                 libs[dep_basename][0],
+                 dep_path,
                  dst_full]
                 )
-
+    return relative_paths
 
 def main(args):
     global prefix
@@ -108,6 +160,10 @@ def main(args):
 
     # Get install prefix.
     prefix = args.prefix
+
+    # Remove possible extra '/' at the end of `prefix`
+    if prefix[-1] == '/':
+        prefix = prefix[:-1]
 
     # Because Bazel executes us in a strange working directory and not the
     # working directory of the user's shell, enforce that the install
@@ -121,10 +177,10 @@ def main(args):
     # Execute the install actions.
     <<actions>>
 
-    # On MacOS, library paths may need to be updated.
+    # On MacOS, executable and library paths may need to be updated.
     if sys.platform == "darwin":
-        fix_library_rpaths()
-
+        relative_paths = fix_library_rpaths()
+        fix_executable_rpaths(relative_paths)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
