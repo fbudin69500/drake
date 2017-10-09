@@ -37,8 +37,8 @@ def drake_pybind_cc_binary(name, srcs = [], copts = [], **kwargs):
         # This is how you tell Bazel to create a shared library.
         linkopts = select(
             {
-                "//tools:apple": ["-Wl,-rpath=@loader_path" + relative_path],
-                "//conditions:default": ["-Wl,-rpath=$$ORIGIN" + relative_path]
+                "//tools/cc_toolchain:apple": ["-Wl,-rpath,@loader_path" + relative_path],
+                "//conditions:default": ["-Wl,-rpath,$$ORIGIN" + relative_path]
             }
         ),
         linkshared = 1,
