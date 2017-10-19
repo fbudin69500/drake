@@ -11,6 +11,7 @@ class TestCommonInstall(unittest.TestCase):
     def testDrakeFindResourceOrThrowInInstall(self):
         # Install into a temporary directory. The temporary directory does not
         # need to be removed as bazel tests are run in a scratch space.
+        self.assertEqual(sys.executable,'')
         tmp_folder = "tmp"
         os.mkdir(tmp_folder)
         # Install the bindings and its dependencies in scratch space.
