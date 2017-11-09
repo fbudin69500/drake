@@ -3,4 +3,4 @@ import pydrake.common
 
 
 def getDrakePath():
-    return pydrake.common.GetDrakePath()
+    return os.path.abspath(pydrake.common.GetDrakePath())

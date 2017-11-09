@@ -496,3 +496,38 @@ def drake_cc_googletest(
         name = name,
         deps = deps,
         **kwargs)
+
+def drake_example_cc_binary(
+        name,
+        srcs = [],
+        data = [],
+        deps = [],
+        copts = [],
+        gcc_copts = [],
+        linkstatic = 1,
+        testonly = 0,
+        add_test_rule = 0,
+        test_rule_args = [],
+        test_rule_data = [],
+        test_rule_size = None,
+        test_rule_flaky = 0,
+        **kwargs):
+    """Creates a rule to declare a C++ binary.
+    """
+    drake_cc_binary(
+        name = name,
+        srcs = srcs +
+        ["//tools/install/libdrake:libdrake.so",
+         "//drake/lcmtypes:drake_lcmtypes_headers"],
+        data = data,
+        deps = deps + ["//tools/install/libdrake:drake_shared_library"],
+        copts = copts,
+        gcc_copts = gcc_copts,
+        linkstatic = linkstatic,
+        testonly = testonly,
+        add_test_rule = add_test_rule,
+        test_rule_args = test_rule_args,
+        test_rule_data = test_rule_data,
+        test_rule_size = test_rule_size,
+        test_rule_flaky = test_rule_flaky,
+        **kwargs)
