@@ -1,0 +1,40 @@
+#!/bin/bash
+# Real compiler path. Configured by CMake
+_COMPILER=@COMPILER@
+# If bazel is configuring the project and trying to get the list of system
+# include directories, we also compute the real path (canonical path) of the
+# include directories that are symlinks. We keep both original and canonical
+# paths just in case. The flags used in this step are visible in bazel source
+# code [1] in the file `tools/cpp/unix_cc_configure.bzl` in the function
+# `get_escaped_cxx_inc_directories`.
+# [1] https://github.com/bazelbuild/bazel
+if [[ "$*" ==  *"-E"* ]] \
+&& [[ "$*" == *"-xc++"* ]] \
+&& [[ "$*" == *"-"* ]] \
+&& [[ "$*" == *"-v"* ]]
+then
+  $_COMPILER $* 2>&1 >/dev/null | while IFS= read line ; do
+    # Print original include directory on stderr (what bazel expects).
+    echo "$line" >&2
+    if [[  $( echo $line | sed -e 's/^[[:space:]]*//' ) == /usr/* ]]; then
+      # Get the link path. We cannot use `readlink -f` because MacOS `readlink`
+      # does not have this flag. Using Python instead and escapes '/' to be
+      # able to run `sed -e "s/../../`.
+      p=$( python -c "import os;
+import sys;
+if os.path.islink(sys.argv[1]):
+  path = os.path.join(os.path.dirname(sys.argv[1]), os.readlink(sys.argv[1]))
+  print os.path.abspath(path).replace('/','\\\/')" $line)
+      # Only print the include directory if it was a symlink, and therefore not
+      # empty.
+      if [[ -n "$p" ]]
+      then
+        # Print canonical include directory on stderr (what bazel expects).
+        echo "$line"  | sed -e "s/\/usr\/.*/$p/" >&2
+      fi
+    fi
+  done
+else
+# Otherwise, just run the compiler normally.
+  $_COMPILER $*
+fi
