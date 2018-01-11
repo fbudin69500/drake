@@ -11,7 +11,7 @@ include(CTest)
 configure_file(CTestCustom.cmake.in CTestCustom.cmake @ONLY)
 foreach(LANG C CXX)
   set(COMPILER ${CMAKE_${LANG}_COMPILER})
-  configure_file(tools/cc_toolchain/wrapper.sh.in ${CMAKE_CURRENT_BINARY_DIR}/${LANG}_wrapper.sh)
+  configure_file(tools/cc_toolchain/wrapper.sh.in ${CMAKE_CURRENT_BINARY_DIR}/${LANG}_wrapper.sh @ONLY)
 endforeach()
 
 if(CYGWIN OR NOT UNIX)

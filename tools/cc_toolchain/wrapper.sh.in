@@ -16,21 +16,20 @@ then
   $_COMPILER $* 2>&1 >/dev/null | while IFS= read line ; do
     # Print original include directory on stderr (what bazel expects).
     echo "$line" >&2
-    if [[  $( echo $line | sed -e 's/^[[:space:]]*//' ) == /usr/* ]]; then
+    line_trim=$(echo $line | sed -e 's/^[[:space:]]*//')
+    if [[  $line_trim == /usr/* ]]; then
       # Get the link path. We cannot use `readlink -f` because MacOS `readlink`
-      # does not have this flag. Using Python instead and escapes '/' to be
-      # able to run `sed -e "s/../../`.
-      p=$( python -c "import os;
-import sys;
-if os.path.islink(sys.argv[1]):
-  path = os.path.join(os.path.dirname(sys.argv[1]), os.readlink(sys.argv[1]))
-  print os.path.abspath(path).replace('/','\\\/')" $line)
-      # Only print the include directory if it was a symlink, and therefore not
-      # empty.
+      # does not have this flag. Using CMake instead and escapes '/' to be
+      # able to run `sed -e "s/../../` later.
+      p=$(cmake -DLINE:STRING=$line_trim -P /dev/stdin << 'EOF'  2>&1 | sed -e 's/\//\\\//g'
+get_filename_component(real_path ${LINE} REALPATH)
+message(${real_path})
+EOF
+)
       if [[ -n "$p" ]]
       then
         # Print canonical include directory on stderr (what bazel expects).
-        echo "$line"  | sed -e "s/\/usr\/.*/$p/" >&2
+        echo "$line" | sed -e "s/\/usr\/.*/$p/" >&2
       fi
     fi
   done
