@@ -13,7 +13,7 @@ class TestKukaSimulation(unittest.TestCase):
         tmpdir = os.environ["TEST_TMPDIR"]
         self.assertTrue(os.path.exists(tmpdir))
         install_dir = os.path.join(tmpdir, "install")
-        result = install_test_helper.install(install_dir, rmdir_cwd=False)
+        result = install_test_helper.install(install_dir)
         self.assertEqual(None, result)
 
         # Make sure the simulation can run without error.  We set cwd="/" to

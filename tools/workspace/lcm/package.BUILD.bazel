@@ -295,6 +295,7 @@ install(
 
 install(
     name = "install",
+    install_tests = ["lcm-gen"],
     targets = [
         ":lcm-gen",
         ":lcm-java",

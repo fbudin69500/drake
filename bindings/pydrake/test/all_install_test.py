@@ -14,7 +14,7 @@ class TestAllInstall(unittest.TestCase):
     def test_install(self):
         # Install into a temporary directory.
         tmp_folder = "tmp"
-        result = install_test_helper.install(tmp_folder, ['lib'])
+        result = install_test_helper.install(tmp_folder)
         self.assertEqual(None, result)
         # Override PYTHONPATH to only use the installed `pydrake` module.
         env_python_path = "PYTHONPATH"

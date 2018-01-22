@@ -7,8 +7,7 @@ import install_test_helper
 class TestCommonInstall(unittest.TestCase):
     def testInstall(self):
         tmp_folder = "tmp"
-        result = install_test_helper.install(tmp_folder,
-                                             ['bin', 'lib', 'share'])
+        result = install_test_helper.install(tmp_folder)
         self.assertEqual(None, result)
         executable_folder = os.path.join(tmp_folder, "bin")
         try:
