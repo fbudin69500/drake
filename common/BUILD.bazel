@@ -414,8 +414,6 @@ drake_py_binary(
     main = "test/cpplint_wrapper.py",
 )
 
-exports_files(["test/resource_tool_installed_test"])
-
 install(
     name = "install",
     install_tests = [":test/resource_tool_installed_test.py"],
@@ -989,4 +987,8 @@ drake_py_test(
 # - drake_deprecated_test in fancy variants
 # - cpplint_wrapper_test.py
 
-add_lint_tests()
+add_lint_tests(
+    python_lint_extra_srcs = [
+        ":test/resource_tool_installed_test.py",
+    ],
+)

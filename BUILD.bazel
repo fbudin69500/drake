@@ -42,11 +42,11 @@ py_library(
     srcs = ["__init__.py"],
 )
 
-INSTALL_TEST_COMMANDS = "installTestCommands.py"
+_INSTALL_TEST_COMMANDS = "install_test_commands.py"
 
 install(
     name = "install",
-    install_tests_script = INSTALL_TEST_COMMANDS,
+    install_tests_script = _INSTALL_TEST_COMMANDS,
     docs = ["LICENSE.TXT"],
     deps = adjust_labels_for_drake_hoist([
         "//drake/automotive/models:install_data",
@@ -64,9 +64,8 @@ install(
 
 install_test(
     name = "install_test",
-    srcs = INSTALL_TEST_COMMANDS,
+    src = _INSTALL_TEST_COMMANDS,
     data = [":install"],
-    visibility = ["//visibility:public"],
 )
 
 add_lint_tests()

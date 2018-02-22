@@ -116,7 +116,7 @@ def _install_action(
         dest, _output_path(ctx, artifact, strip_prefix, warn_foreign))
     file_dest = _rename(file_dest, rename)
 
-    return struct(tgt = target, src = artifact, dst = file_dest)
+    return struct(src = artifact, dst = file_dest)
 
 #------------------------------------------------------------------------------
 def _install_actions(ctx, file_labels, dests, strip_prefixes = [],
@@ -286,23 +286,18 @@ def _install_test_actions(
         actions):
     test_actions = []
     targets_dict = {}
-    # Create a directory of the targets to easily find if they are installed
+    # Create a dictionary of the targets to easily find if they are installed
     # and where they are installed.
     for a in actions:
         if hasattr(a, "src"):
             targets_dict[a.src] = a.dst
 
+    # For files, we run the file from the build tree.
     for test in ctx.attr.install_tests:
         for f in test.files:
-            # If the file is found in the list of installed files, we use the
-            # file from the install tree. If not, we use the target file that
-            # was specified.
-            if f in targets_dict:
-                test_actions.append(
-                    struct(src = f, cmd = targets_dict[f], installed = True))
-            else:
-                test_actions.append(
-                    struct(src = f, cmd = f.path, installed = False))
+            test_actions.append(
+                struct(src = f, cmd = f.path))
+
     return test_actions
 
 #------------------------------------------------------------------------------
@@ -326,14 +321,14 @@ def _java_launcher_code(action):
 # targets, headers, or documentation files.
 def _install_impl(ctx):
     actions = []
-    installedTests = []
+    installed_tests = []
     rename = dict(ctx.attr.rename)
     # Collect install actions from dependencies.
     for d in ctx.attr.deps:
         actions += d[InstallInfo].install_actions
         rename.update(d[InstallInfo].rename)
         if InstalledTestInfo in d:
-            installedTests += d[InstalledTestInfo].tests
+            installed_tests += d[InstalledTestInfo].tests
 
     # Generate actions for data, docs and includes.
     actions += _install_actions(ctx, ctx.attr.docs, ctx.attr.doc_dest,
@@ -368,7 +363,7 @@ def _install_impl(ctx):
             actions += _install_runtime_actions(ctx, t)
 
     # Generate install test actions.
-    installedTests += _install_test_actions(ctx, actions)
+    installed_tests += _install_test_actions(ctx, actions)
 
     # Generate code for install actions.
     script_actions = []
@@ -402,13 +397,9 @@ def _install_impl(ctx):
     # Commands are run in current working directory '/' to avoid relying of
     # build artifact that could be found in the sandbox directory or the
     # source tree.
-    for i in installedTests:
-        if i.installed:
-            script_tests += [
-                "subprocess.check_call(os.path.join(os.environ['TESTINSTALLPATH'], '%s'), cwd='/')  # noqa" % i.cmd]  # noqa
-        else:
-            script_tests += [
-                "subprocess.check_call(os.path.join(os.getcwd(), '%s'), cwd='/')  # noqa" % i.cmd]  # noqa
+    for i in installed_tests:
+        script_tests += [
+            "subprocess.check_call(os.path.join(os.getcwd(), '%s'), cwd='/')  # noqa" % i.cmd]  # noqa
 
     # Generate test installation script
     if ctx.attr.install_tests_script:
@@ -425,10 +416,10 @@ def _install_impl(ctx):
     # Return actions.
     files = ctx.runfiles(
         files = [a.src for a in actions if not hasattr(a, "main_class")] +
-                [i.src for i in installedTests])
+                [i.src for i in installed_tests])
     return [
         InstallInfo(install_actions = actions, rename = rename),
-        InstalledTestInfo(tests = installedTests),
+        InstalledTestInfo(tests = installed_tests),
         DefaultInfo(runfiles = files),
     ]
 
@@ -587,9 +578,8 @@ Args:
     py_strip_prefix: List of prefixes to remove from Python paths.
     rename: Mapping of install paths to alternate file names, used to rename
       files upon installation.
-    install_tests: List of targets that will be run to test the install tree.
-        It can contain executables that are installed, but also scripts that
-        are designed to test the install tree.
+    install_tests: List of scripts that are designed to test the install
+        tree. These scripts will not be installed.
     install_tests_script: Name of the generated Python script that contains
         the commands run to test the install tree. This only needs to be
         specified for the main `install()` call, and the same name should be
@@ -772,14 +762,14 @@ def install_cmake_config(
 #------------------------------------------------------------------------------
 def install_test(
         name,
-        srcs,
+        src,
         **kwargs):
     """A wrapper to test installed drake executables.
 
     !!!Important: This command should be called only once, when the main
     installation step occurs!!!
 
-    This wrapper takes as `srcs` the file generated by the `install()`
+    This wrapper takes as `src` the file generated by the `install()`
     rule. This list should contain only the file that is generated by the main
     `install()` call since it will contain all the install tests declared in
     the entire project.
@@ -789,8 +779,8 @@ def install_test(
         size = "small",
         # Increase the timeout so that debug builds are successful.
         timeout = "long",
-        srcs = [srcs],
-        main = srcs,
+        srcs = [src],
+        main = src,
         # This test fails when bazel is run with `no_everything` because
         # `libgurobi70.so` is not found [Issue #7283].
         tags = ["no_everything"],

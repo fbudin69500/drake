@@ -1,10 +1,11 @@
 import os
 import signal
 import subprocess
+import sys
 import time
 
 
-def install(installation_folder="tmp"):
+def install():
     """Install into a temporary directory.
 
     Runs install script to install target in the specified temporary
@@ -14,29 +15,41 @@ def install(installation_folder="tmp"):
     """
     assert "TEST_TMPDIR" in os.environ, (
         "This may only be run from within `bazel test`")
-    os.mkdir(installation_folder)
+    # Install into the tmpdir that Bazel has created for us.
+    installation_folder = get_install_dir()
+    assert os.path.exists(installation_folder) is True
     # Install target and its dependencies in scratch space.
-    subprocess.check_call(
-        ["install",
-         os.path.abspath(installation_folder)]
-        )
+    subprocess.check_call(["install", installation_folder])
 
 
 def get_install_dir():
-    """ Returns install directory specified in environment variable.
+    """Returns install directory specified in environment variable.
 
     When running tests of in the install tree, the current working directory
     needs to be changed (e.g. to '/' to avoid finding artifacts from the
-    build tree when testing the installation. The caveat is that Python
+    build tree when testing the installation). The caveat is that Python
     scripts that run install tests may need to know the install directory.
-    To keep that information, the install directory is saved in the environment
-    variable `TESTINSTALLPATH` and can be easily recovered with a call of this
-    function.
+    Since within the tests, installation is always in `TEST_TMPDIR`, which
+    is the absolute path to a private writable directory, this function returns
+    the path to that folder.
     """
-    return os.path.abspath(os.environ['TESTINSTALLPATH'])
+    return os.environ['TEST_TMPDIR']
 
 
-def runAndKill(cmd, timeout=2.0):
+def get_python_executable():
+    """Use appropriate Python executable
+
+    Call python2 on MacOS to force using python brew install. Calling python
+    system would result in a crash since pydrake was built against brew python.
+    On other systems, it will just fall-back to the current Python executable.
+    """
+    if sys.platform == "darwin":
+        return "python2"
+    else:
+        return sys.executable
+
+
+def run_and_kill(cmd, timeout=2.0):
     """Convenient function to start a command and kill it automatically.
 
     This function starts a given command and kills it after the given
@@ -54,8 +67,5 @@ def runAndKill(cmd, timeout=2.0):
         ret = proc.poll()
         assert ret is None
     # time's up: kill the proc (and it's group):
-    try:
-        os.kill(proc.pid, signal.SIGTERM)
-    except OSError as e:
-        assert e.strerror == ""
+    proc.terminate()
     assert proc.wait() == -signal.SIGTERM
