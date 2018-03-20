@@ -51,7 +51,7 @@ Argument:
 
 load("@drake//tools/workspace:os.bzl", "determine_os")
 
-VTK_MAJOR_MINOR_VERSION = "8.0"
+VTK_MAJOR_MINOR_VERSION = "8.1"
 
 def _vtk_cc_library(os_name, name, hdrs = None, visibility = None, deps = None,
                     header_only = False, linkopts = []):
@@ -110,15 +110,13 @@ def _impl(repository_ctx):
             VTK_MAJOR_MINOR_VERSION), "include")
     elif os_result.is_ubuntu:
         if os_result.ubuntu_release == "16.04":
-            archive = "vtk-v8.0.1-qt-5.5.1-xenial-x86_64-1.tar.gz"
-            sha256 = "d6cb1b8cfe8d8b9abe400c39267954cbba5b12d4ff550d42a1fe695d3e01dc40"  # noqa
+            archive = "vtk-v8.1.0-qt-5.5.0-xenial-x86_64-1.tar.gz"
+            sha256 = "6d9837d8fc2b58f4fa307722004d4875d0aa8cc256137a4001c5029fa9d4af5d"  # noqa
         else:
             fail("Operating system is NOT supported", attr = os_result)
 
-        urls = [
-            x.format(archive = archive)
-            for x in repository_ctx.attr.mirrors.get("vtk")
-        ]
+        urls = ["http://localhost:1337/{archive}".format(archive = archive)]
+
         root_path = repository_ctx.path("")
 
         repository_ctx.download_and_extract(urls, root_path, sha256 = sha256)

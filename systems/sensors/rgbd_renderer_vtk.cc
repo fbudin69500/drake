@@ -363,10 +363,10 @@ RgbdRendererVTK::Impl::Impl(RgbdRendererVTK* parent,
     // Always setting off to depth window since displaying the colors which
     // encode floats as depth values doesn't provide useful information to
     // users.
-    pipelines_[ImageType::kDepth]->window->SetOffScreenRendering(1);
+    pipelines_[ImageType::kDepth]->window->SetOffScreenRendering(0);
   } else {
     for (auto& pipeline : pipelines_) {
-      pipeline->window->SetOffScreenRendering(1);
+      pipeline->window->SetOffScreenRendering(0);
     }
   }
 
