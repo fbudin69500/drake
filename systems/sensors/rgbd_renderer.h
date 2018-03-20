@@ -38,7 +38,7 @@ struct RenderingConfig {
   /// purposes.
   const bool show_window{kDefaultShowWindow};
   /// Default value for `show_window`.
-  static constexpr bool kDefaultShowWindow{false};
+  static constexpr bool kDefaultShowWindow{true};
 };
 
 

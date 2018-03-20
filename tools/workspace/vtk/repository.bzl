@@ -119,6 +119,8 @@ def _impl(repository_ctx):
             x.format(archive = archive)
             for x in repository_ctx.attr.mirrors.get("vtk")
         ]
+
+
         root_path = repository_ctx.path("")
 
         repository_ctx.download_and_extract(urls, root_path, sha256 = sha256)
