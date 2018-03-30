@@ -21,6 +21,7 @@
 #include <vtkOpenGLRenderWindow.h>
 #include <vtkOpenGLTexture.h>
 #include <vtkPNGReader.h>
+#include <vtkRenderWindow.h>
 #include <vtkPlaneSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
@@ -33,10 +34,10 @@
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkVersion.h>
 #include <vtkWindowToImageFilter.h>
-
 #include "drake/common/drake_assert.h"
 #include "drake/systems/sensors/depth_shaders.h"
 #include "drake/systems/sensors/vtk_util.h"
+#include <vtkPNGWriter.h>
 
 // This macro declares vtkRenderingOpenGL2_AutoInit_{Construct(), Destruct()}
 // functions and the former is called via VTK_AUTOINIT_CONSTRUCT in
@@ -193,7 +194,6 @@ class RgbdRendererVTK::Impl : private ModuleInitVtkRenderingOpenGL2 {
   // Use ImageType to access to this array. We assume pipelines_'s indices to be
   // 0 for RGB, 1 for depth, and 2 for ground-truth label rendering.
   std::array<std::unique_ptr<RenderingPipeline>, 3> pipelines_;
-
   // A map which takes pairs of a body index in RBT and three vectors of
   // vtkSmartPointer to vtkActor for color, depth and label rendering
   // respectively. Each vtkActor corresponds to an visual element specified in
@@ -290,7 +290,34 @@ void RgbdRendererVTK::Impl::ImplRenderColorImage(
     ImageRgba8U* color_image_out) const {
   // TODO(sherm1) Should evaluate VTK cache entry.
   PerformVTKUpdate(pipelines_[ImageType::kColor]);
+  std::cout<<"Pointer:"<<std::endl;
+  std::cout<<pipelines_[ImageType::kColor]->window.GetPointer()<<std::endl;
+  for(int i=0;i<640; i++)
+  {
+      for(int j = 0 ; j< 480;j++)
+      {
+          if(int(color_image_out->at(i, j)[0]) != 0 || int(color_image_out->at(i, j)[1]) != 0 || int(color_image_out->at(i, j)[2]) != 0)
+          {
+              std::cout<<i<<" "<<j<<std::endl;
+  std::cout<<"color:"<<int(color_image_out->at(i, j)[0])<<" "<<int(color_image_out->at(i, j)[1])<<" "<<int(color_image_out->at(i, j)[2])<<" "<<std::endl;
+          }
+
+      }
+  }
+
   pipelines_[ImageType::kColor]->exporter->Export(color_image_out->at(0, 0));
+
+  std::cout<<"before color"<<std::endl;
+  //interactor_color->Start();
+  std::cout<<"here"<<std::endl;
+//    vtkNew<vtkWindowToImageFilter> filter;
+//    filter->SetInput(pipelines_[ImageType::kColor]->window);
+//    filter->Update();
+//      vtkNew<vtkPNGWriter> writer;
+//      writer->SetInputData(filter->GetOutput());
+//      writer->SetFileName("/tmp/colorimage.png");
+//      writer->Write();
+//      std::cout<<"done writing kDepth"<<std::endl;
 }
 
 void RgbdRendererVTK::Impl::ImplRenderDepthImage(
@@ -325,6 +352,20 @@ void RgbdRendererVTK::Impl::ImplRenderDepthImage(
       }
     }
   }
+
+//  std::cout<<"here"<<std::endl;
+//    vtkNew<vtkWindowToImageFilter> filter;
+//    filter->SetInput(pipelines_[ImageType::kDepth]->window);
+//    filter->Update();
+//      vtkNew<vtkPNGWriter> writer;
+//      writer->SetInputData(filter->GetOutput());
+//      writer->SetFileName("/tmp/depthimage.png");
+//      writer->Write();
+//      std::cout<<"done writing kDepth"<<std::endl;
+
+  std::cout<<"interactor depth"<<std::endl;
+//  interactor_depth->Start();
+  std::cout<<"interactor depth after"<<std::endl;
 }
 
 void RgbdRendererVTK::Impl::ImplRenderLabelImage(
@@ -348,7 +389,20 @@ void RgbdRendererVTK::Impl::ImplRenderLabelImage(
           static_cast<int16_t>(parent_->color_palette().LookUpId(color));
     }
   }
+std::cout<<"before label inter"<<std::endl;
+//  interactor_label->Start();
+
+std::cout<<"here"<<std::endl;
+//  vtkNew<vtkWindowToImageFilter> filter;
+//  filter->SetInput(pipelines_[ImageType::kLabel]->window);
+//  filter->Update();
+//    vtkNew<vtkPNGWriter> writer;
+//    writer->SetInputData(filter->GetOutput());
+//    writer->SetFileName("/tmp/labelimage.png");
+//    writer->Write();
+//    std::cout<<"done writing kDepth"<<std::endl;
 }
+
 
 RgbdRendererVTK::Impl::Impl(RgbdRendererVTK* parent,
                             const Eigen::Isometry3d& X_WC)
@@ -363,8 +417,13 @@ RgbdRendererVTK::Impl::Impl(RgbdRendererVTK* parent,
     // Always setting off to depth window since displaying the colors which
     // encode floats as depth values doesn't provide useful information to
     // users.
+    //    int a;
+//    cin >> a;
     pipelines_[ImageType::kDepth]->window->SetOffScreenRendering(0);
-  } else {
+    pipelines_[ImageType::kColor]->window->SetOffScreenRendering(0);
+
+
+    } else {
     for (auto& pipeline : pipelines_) {
       pipeline->window->SetOffScreenRendering(0);
     }
@@ -385,6 +444,7 @@ RgbdRendererVTK::Impl::Impl(RgbdRendererVTK* parent,
 
     pipeline->window->SetSize(parent_->config().width,
                               parent_->config().height);
+    pipeline->window->Render();
     pipeline->window->AddRenderer(pipeline->renderer.GetPointer());
     pipeline->filter->SetInput(pipeline->window.GetPointer());
 #if VTK_MAJOR_VERSION == 8 && VTK_MINOR_VERSION == 0

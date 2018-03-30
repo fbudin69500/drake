@@ -152,6 +152,7 @@ licenses([
     file_content += _vtk_cc_library(
         repository_ctx.os.name,
         "vtkCommonColor",
+        hdrs = ["vtkCallbackCommand.h"],
         deps = [
             ":vtkCommonCore",
             ":vtkCommonDataModel",
@@ -525,6 +526,7 @@ licenses([
             "vtkVolume.h",
             "vtkVolumeCollection.h",
             "vtkWindowToImageFilter.h",
+            "vtkRenderWindowInteractor.h",
         ],
         deps = [
             ":vtkCommonColor",
@@ -534,6 +536,61 @@ licenses([
             ":vtkCommonMath",
             ":vtkFiltersCore",
             ":vtkFiltersGeometry",
+        ],
+    )
+
+    file_content += _vtk_cc_library(
+        repository_ctx.os.name,
+        "vtkFiltersStatistics",
+        hdrs = [
+        ],
+        deps = [
+        ],
+    )
+
+    file_content += _vtk_cc_library(
+        repository_ctx.os.name,
+        "vtkImagingFourier",
+        hdrs = [
+        ],
+        deps = [
+        ],
+    )
+
+
+    file_content += _vtk_cc_library(
+        repository_ctx.os.name,
+        "vtkFiltersExtraction",
+        hdrs = [
+        ],
+        deps = [
+        ],
+    )
+
+    file_content += _vtk_cc_library(
+        repository_ctx.os.name,
+        "vtkImagingCore",
+        hdrs = [
+        ],
+        deps = [
+        ],
+    )
+
+    file_content += _vtk_cc_library(
+        repository_ctx.os.name,
+        "vtkInteractionStyle",
+        hdrs = [
+            "vtkInteractorStyleTrackballCamera.h",
+            "vtkInteractionStyleModule.h",
+            "vtkInteractorStyle.h",
+            "vtkInteractorObserver.h",
+        ],
+        deps = [
+            ":vtkRenderingCore",
+            ":vtkFiltersExtraction",
+            ":vtkFiltersStatistics",
+            ":vtkImagingFourier",
+            ":vtkImagingCore",
         ],
     )
 
