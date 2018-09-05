@@ -5,6 +5,7 @@
 
 load("@drake//tools/install:install.bzl", "install", "install_test")
 load("//tools/lint:lint.bzl", "add_lint_tests")
+load("//tools:testrule.bzl", "my_rule")
 
 package(
     default_visibility = ["//visibility:public"],
@@ -30,6 +31,14 @@ alias(
 alias(
     name = "protobuf_python",
     actual = "@com_google_protobuf//:protobuf_python",
+)
+
+#my_rule(name="plop", srcs=["//common:constants.h"], deps=["//common:essential"])
+
+# This target is used by the shell rule.
+sh_binary(
+    name = "execute",
+    srcs = ["execute.sh"],
 )
 
 # Drake's top-level module; all drake_py_stuff rules add this to deps.
@@ -77,4 +86,4 @@ install_test(
     ],
 )
 
-add_lint_tests()
+#add_lint_tests()

@@ -20,6 +20,7 @@ load(
     "get_drake_py_installs",
     "get_pybind_package_info",
 )
+load("//tools:testrule.bzl", "my_rule")
 
 package(default_visibility = [
     "//bindings:__subpackages__",
@@ -144,13 +145,14 @@ drake_cc_library(
     visibility = ["//visibility:public"],
 )
 
-drake_pybind_library(
+res = drake_pybind_library(
     name = "symbolic_py",
     cc_deps = [
         ":symbolic_types_pybind",
         "//bindings/pydrake/util:wrap_pybind",
     ],
     cc_srcs = ["symbolic_py.cc"],
+    cc_so_name = "symbolic_py_so",
     package_info = PACKAGE_INFO,
     py_deps = [
         ":common_py",
@@ -160,6 +162,8 @@ drake_pybind_library(
     ],
     py_srcs = ["symbolic.py"],
 )
+
+my_rule(name="symbolic_py_magic", deps = [":symbolic_py_so.so"])#, ":symbolic_py"])
 
 drake_pybind_library(
     name = "trajectories_py",
